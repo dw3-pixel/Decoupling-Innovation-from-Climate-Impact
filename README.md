@@ -15,7 +15,7 @@ File Name: index.html
 Description : R Markdown Source Code. The complete analysis script containing all R code, data wrangling, statistical tests (Spearman's Rho, Partial Correlation), and model building.
 
 
-[](https://dashboards.sdgindex.org/downloads/)  - Source of primary dataset used for the analysis.
+[[](https://dashboards.sdgindex.org/downloads/) - Source of primary dataset used for the analysis.
 
 
  Key Findings
