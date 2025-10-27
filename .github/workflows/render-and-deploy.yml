@@ -1,0 +1,59 @@
+# -------------------------------------------------------------------------
+# Workflow: Render R Markdown and Auto-Commit HTML
+# -------------------------------------------------------------------------
+name: Rmd Render and Deploy
+
+# 1. Define when this workflow should run
+on:
+  # Trigger on pushes to the main branch
+  push:
+    branches: [ main ] 
+    # Only run the workflow if an Rmd file (or this workflow file) changes
+    paths:
+      - '**.Rmd'
+      - '.github/workflows/render-and-deploy.yml'
+
+# 2. Set permissions for the GITHUB_TOKEN
+# This is CRITICAL for the auto-commit step to work.
+# It grants the workflow permission to write new files (the rendered HTML)
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      # 3. Setup R and R dependencies
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Install R Markdown and dependencies
+        run: |
+          install.packages(c("rmarkdown", "knitr"))
+        # Tell the action to run the commands using Rscript
+        shell: Rscript {0}
+
+     # 4. Render the R Markdown file to HTML
+      - name: Render index.Rmd
+        run: |
+          # The key change: explicitly specify the desired output filename.
+          rmarkdown::render(
+            input = "Index.html.Rmd",            # The name of your Rmd file
+            output_file = "index.html"      # The desired final HTML file name
+          )
+        shell: Rscript {0}
+
+      # 5. Automatically Commit the generated HTML file
+      - name: Commit and Push Compiled Files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          # The file you want to commit (your knitted output)
+          # Replace 'index.html' with your output file name if different
+          commit_message: "Auto-render: Rebuilt index.html after Rmd changes"
+          file_pattern: 'index.html'
+          # No need to set a token; the GITHUB_TOKEN is used by default 
+          # due to the 'permissions: contents: write' setting above
